@@ -1,3 +1,12 @@
+# Project Description
+This is an e-Commerce store project as a part of React/Next.js course on Udemy by the greate instructor [John Smilga](https://github.com/john-smilga)
+
+[Course Link](https://www.udemy.com/share/101ros3@TBBqLXW6V9qenHW_USCB8nhic9wEjsJFcSRi-fX91DSRVONyqvyQh53yFuVRcVJa5Q==/)
+
+The following sections of the the read me files belongs to the instructor.
+
+___
+
 ### Next App
 
 ```sh
