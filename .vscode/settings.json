@@ -18,5 +18,10 @@
     "titleBar.inactiveBackground": "#53975e99",
     "titleBar.inactiveForeground": "#e7e7e799"
   },
-  "peacock.remoteColor": "#53975e"
+  "peacock.remoteColor": "#53975e",
+  "cSpell.words": [
+    "clsx",
+    "embla",
+    "lucide"
+  ]
 }
