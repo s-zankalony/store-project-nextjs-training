@@ -14,7 +14,7 @@ import {
   SignedIn,
   SignedOut,
   SignInButton,
-  SignOutButton,
+  // SignOutButton,
   SignUpButton,
 } from '@clerk/nextjs';
 import SignOutLink from './SignOutLink';
