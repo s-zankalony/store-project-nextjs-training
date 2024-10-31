@@ -23,6 +23,7 @@
     "clsx",
     "embla",
     "lucide",
-    "trpc"
+    "trpc",
+    "uuidv"
   ]
 }
