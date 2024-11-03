@@ -7,6 +7,8 @@ import { imageSchema, productSchema, validateWithZodSchema } from './schemas';
 import { ZodSchema } from 'zod';
 import path from 'path';
 import { promises as fs } from 'fs';
+import { deleteImage, uploadImage } from './supabase';
+import { revalidatePath } from 'next/cache';
 
 export const fetchFeaturedProducts = async () => {
   const products = await db.product.findMany({
@@ -20,6 +22,12 @@ export const fetchFeaturedProducts = async () => {
 export const getAuthUser = async () => {
   const user = await currentUser();
   if (!user) redirect('/');
+  return user;
+};
+
+const getAdminUser = async () => {
+  const user = await getAuthUser();
+  if (user.id !== process.env.ADMIN_USER_ID) redirect('/');
   return user;
 };
 
@@ -63,40 +71,45 @@ export const createProductAction = async (
     const rawData = Object.fromEntries(formData);
     const file = formData.get('image') as File;
     const validatedFields = validateWithZodSchema(productSchema, rawData);
-    const validateFile = validateWithZodSchema(imageSchema, { image: file });
+    const validatedFile = validateWithZodSchema(imageSchema, { image: file });
 
-    console.log(validateFile);
-    // added by copilot
-    let imagePath = '/images/default.jpg';
-    if (file) {
-      // generate a unique filename
-      const fileExt = path.extname(file.name);
-      const uniqueName = `${Date.now()}-${Math.random()
-        .toString(36)
-        .substr(2)}${fileExt}`;
-      // define the upload directory
-      const uploadDir = path.join(process.cwd(), 'public', 'uploads');
-      // ensure the upload directory exists
-      await fs.mkdir(uploadDir, { recursive: true });
-
-      // save the file
-      const buffer = Buffer.from(await file.arrayBuffer());
-      const savePath = path.join(uploadDir, uniqueName);
-      await fs.writeFile(savePath, buffer);
-
-      // update imagePath
-      imagePath = `/uploads/${uniqueName}`;
-    }
+    const fullPath = await uploadImage(validatedFile.image);
 
     await db.product.create({
       data: {
         ...validatedFields,
-        image: '/images/product-1.jpg',
+        image: fullPath,
         clerkId: user.id,
       },
     });
+  } catch (error) {
+    return renderError(error);
+  }
+  redirect('/admin/products');
+};
 
-    return { message: 'product created' };
+export const fetchAdminProducts = async () => {
+  await getAdminUser();
+  const products = await db.product.findMany({
+    orderBy: {
+      createdAt: 'desc',
+    },
+  });
+  return products;
+};
+
+export const deleteProductAction = async (prevState: { productId: string }) => {
+  const { productId } = prevState;
+  await getAdminUser();
+  try {
+    const product = await db.product.delete({
+      where: {
+        id: productId,
+      },
+    });
+    await deleteImage(product.image);
+    revalidatePath('/admin/products');
+    return { message: 'product removed' };
   } catch (error) {
     return renderError(error);
   }
