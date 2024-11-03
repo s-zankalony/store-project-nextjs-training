@@ -8,6 +8,10 @@ const nextConfig = {
         port: '',
         pathname: '/photos/**',
       },
+      {
+        protocol: 'https',
+        hostname: 'rsjquspcazgelkikyzbu.supabase.co',
+      },
     ],
   },
 };
