@@ -3,7 +3,12 @@
 import db from '@/utils/db';
 import { currentUser } from '@clerk/nextjs/server';
 import { redirect } from 'next/navigation';
-import { imageSchema, productSchema, validateWithZodSchema } from './schemas';
+import {
+  imageSchema,
+  productSchema,
+  reviewSchema,
+  validateWithZodSchema,
+} from './schemas';
 import { ZodSchema } from 'zod';
 import path from 'path';
 import { promises as fs } from 'fs';
@@ -239,10 +244,35 @@ export const createReviewAction = async (
   prevState: any,
   formData: FormData
 ) => {
-  return { message: 'review submitted successfully...' };
+  const user = await getAuthUser();
+
+  try {
+    const rawData = Object.fromEntries(formData);
+    const validatedFields = validateWithZodSchema(reviewSchema, rawData);
+    await db.review.create({
+      data: {
+        ...validatedFields,
+        clerkId: user.id,
+      },
+    });
+    revalidatePath(`/products/${validatedFields.productId}`);
+    return { message: 'review submitted successfully...' };
+  } catch (error) {
+    return renderError(error);
+  }
 };
 
-export const fetchProductReview = async () => {};
+export const fetchProductReviews = async (productId: string) => {
+  const reviews = await db.review.findMany({
+    where: {
+      productId,
+    },
+    orderBy: {
+      createdAt: 'desc',
+    },
+  });
+  return reviews;
+};
 export const fetchProductReviewByUser = async () => {};
 export const deleteReviewAction = async () => {};
 export const findExistingReview = async () => {};
