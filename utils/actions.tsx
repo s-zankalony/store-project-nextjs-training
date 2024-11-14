@@ -291,7 +291,7 @@ export const fetchProductRating = async (productId: string) => {
   };
 };
 
-export const fetchProductReviewByUser = async () => {
+export const fetchProductReviewsByUser = async () => {
   const user = await getAuthUser();
   const reviews = await db.review.findMany({
     where: {
@@ -327,4 +327,11 @@ export const deleteReviewAction = async (prevState: { reviewId: string }) => {
     return renderError(error);
   }
 };
-export const findExistingReview = async () => {};
+export const findExistingReview = async (userId: string, productId: string) => {
+  return db.review.findFirst({
+    where: {
+      clerkId: userId,
+      productId,
+    },
+  });
+};
