@@ -25,7 +25,7 @@ const ImageInputContainer = (props: ImageInputContainerProps) => {
         width={200}
         height={200}
         className="rounded object-cover mb-4 w-[200px] h-[200px]"
-        alt="name"
+        alt={name}
       />
       <Button
         variant="outline"
