@@ -1,7 +1,7 @@
 'use server';
 
 import db from '@/utils/db';
-import { currentUser } from '@clerk/nextjs/server';
+import { auth, currentUser } from '@clerk/nextjs/server';
 import { redirect } from 'next/navigation';
 import {
   imageSchema,
@@ -14,6 +14,7 @@ import path from 'path';
 import { promises as fs } from 'fs';
 import { deleteImage, uploadImage } from './supabase';
 import { revalidatePath } from 'next/cache';
+import { error } from 'console';
 
 export const fetchFeaturedProducts = async () => {
   const products = await db.product.findMany({
@@ -335,3 +336,84 @@ export const findExistingReview = async (userId: string, productId: string) => {
     },
   });
 };
+
+export const fetchCartItems = async () => {
+  const { userId } = await auth();
+  const cart = await db.cart.findFirst({
+    where: {
+      clerkId: userId ?? '',
+    },
+    select: {
+      numItemsInCart: true,
+    },
+  });
+  return cart?.numItemsInCart || 0;
+};
+
+const fetchProduct = async (productId: string) => {
+  const product = await db.product.findUnique({
+    where: {
+      id: productId,
+    },
+  });
+  if (!product) {
+    throw new Error('Product not found');
+  }
+  return product;
+};
+
+const includeProductClause = {
+  cartItems: {
+    include: {
+      product: true,
+    },
+  },
+};
+
+export const fetchOrCreateCart = async ({
+  userId,
+  errorOnFailure = false,
+}: {
+  userId: string;
+  errorOnFailure?: boolean;
+}) => {
+  let cart = await db.cart.findFirst({
+    where: {
+      clerkId: userId,
+    },
+    include: includeProductClause,
+  });
+  if (!cart && errorOnFailure) {
+    throw new Error('Cart not found');
+  }
+  if (!cart) {
+    cart = await db.cart.create({
+      data: {
+        clerkId: userId,
+      },
+      include: includeProductClause,
+    });
+  }
+  return cart;
+};
+
+const updateOrCreateCartItem = async () => {};
+
+export const updateCart = async () => {};
+
+export const addToCartAction = async (prevState: any, formData: FormData) => {
+  const user = await getAuthUser();
+  try {
+    const productId = formData.get('productId') as string;
+    const amount = Number(formData.get('amount'));
+    await fetchProduct(productId);
+    const cart = await fetchOrCreateCart({ userId: user.id });
+  } catch (error) {
+    return renderError(error);
+  }
+  redirect('/cart');
+};
+
+export const removeCartItemAction = async () => {};
+
+export const updateCartItemAction = async () => {};
