@@ -5,7 +5,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { Value } from '@radix-ui/react-select';
+// import { Value } from '@radix-ui/react-select';
 
 export enum Mode {
   SingleProduct = 'singleProduct',
