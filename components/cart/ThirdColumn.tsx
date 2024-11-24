@@ -22,6 +22,7 @@ function ThirdColumn({ quantity, id }: { quantity: number; id: string }) {
     setAmount(value);
     toast({ description: result.message });
     setIsLoading(false);
+    console.log(isLoading);
   };
   return (
     <div className="md:ml-8">
