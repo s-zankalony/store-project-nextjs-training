@@ -5185,6 +5185,24 @@ Checkout.tsx                        payment/route.ts
 
 ```
 
+In mermaid syntax
+
+```mermaid
+
+sequenceDiagram
+    participant Client
+    participant Server
+    participant StripeAPI as Stripe API
+
+    Client->>Server: Fetch clientSecret
+    Server->>StripeAPI: Request
+    StripeAPI-->>Server: clientSecret
+    Server-->>Client: clientSecret response
+
+    note over Client: Checkout.tsx
+    note over Server: payment/route.ts
+```
+
 ### Checkout Page
 
 - create app/checkout/page.tsx
@@ -5333,6 +5351,19 @@ payment/route.ts                    confirm/route.ts            orders page
 
 ```
 
+In mermaid syntax
+
+```mermaid
+sequenceDiagram
+    participant Server1 as Server (payment/route.ts)
+    participant Server2 as Server (confirm/route.ts)
+    participant OrdersPage as Orders Page
+
+    Server1->>Server2: Checkout Session ID
+    Server2->>OrdersPage: redirect
+
+```
+
 ### API - Confirm Route
 
 ```ts
@@ -5377,4 +5408,8 @@ export const GET = async (req: NextRequest) => {
   }
   redirect('/orders');
 };
+```
+
+```
+
 ```
